@@ -1,9 +1,7 @@
 ---
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ## Supplementary details supporting the analysis of OSL and C14 dates, lithics and shellfish from the 1989 excavations at Madjebebe (Malakanunja II)
@@ -12,27 +10,62 @@ vignette: >
 
 This document contains the source code used to generate the plots and statistics presented in the manuscript. It is provided to give the reader additional insight into the data analysis workflow and allow anyone to reproduce our analysis and further explore the analyses and data for themselves. 
 
-```{r, echo = FALSE}
-library(knitr)
+```{r, eval = TRUE, echo=FALSE}
+library(rmarkdown)
+library(tidyverse)
+
 opts_chunk$set(fig.width = 7, messages = FALSE, warning = FALSE)
 ```
 
-### OSL and C14 dates
+## OSL and C14 dates
+
+### `chrono_data_tidied`
 
 ```{r read-in-dates-data}
 library(mjb1989excavationpaper)
 chrono_data <- get_chrono_data()
 ```
 
+OK, let's have a look at what `get_chrono_data` actually does. You can print the body of any function by calling it without a parenthesis.
+
+```{r}
+get_chrono_data
+```
+
+And let's have a quick at the raw data too:
+
+```{r}
+chrono_data %>% as_tibble()
+```
+
+### `chrono_data_tidied`
+
+Let's see the `chrono_data_tidied` data
 
 ```{r clean-up-dates}
 chrono_data_tidied <- tidy_chrono_data(chrono_data)
+chrono_data_tidied %>% as_tibble()
 ```
+
+### `interpolate_chrono_data`
+
+```{r}
+interpolate_chrono_data
+```
+
 
 
 ```{r interpolate}
 chrono_data_interpolated <- interpolate_chrono_data(chrono_data_tidied)
+
+chrono_data_interpolated %>% as_tibble()
 ```
+
+
+```{r}
+plot_chrono_data
+```
+
 
 ```{r plot-dates, results='asis'}
 chrono_data_plotted <- plot_chrono_data(chrono_data_tidied, 
@@ -40,18 +73,29 @@ chrono_data_plotted <- plot_chrono_data(chrono_data_tidied,
                         oldest = chrono_data_interpolated$oldest,
                         base_of_dense_depth = chrono_data_interpolated$base_of_dense_depth,
                         dense = chrono_data_interpolated$dense)
-cat("<p><img src='figures/Fig_5_MKII_dates_from_1989_for_paper.svg'</p>")
+
+chrono_data_plotted
 ```
 
 Based on the TL age estimates and the artefact distribution, Roberts et al. (1990a) suggested first occupation at the site began 55 ± 5 ka. Although the excavators were conservative in their interpretation sstressing the upper (i.e. 50 ka) limit of this age range and taking the lower limit of the high density band of artefacts (2.4 m bs) as the actual level of initial occupation  we confirm here that the lowest artefacts occur in Spit 49, 2.76  2.8 m deep below surface and are bracketed by the original OSL age estimate of 55.5 ± 8.2 ka (KTL-162) and the TL estimate of 65 ± 14 ka (KTL-141). Subsequent redating of several of the lower samples at MJB using single grain and single aliquot OSL methods reduced the error ranges for the lower dates substantially, but did not alter the original results (Roberts et al. 1998). 
 
 At the time of Roberts et al. (1998) publication and commentary no calibration curve was available for radiocarbon dates greater than 11 ka, and hence the issue of underestimation of calendar years could not be resolved. A calibration curve is now available back to 50 ka (Reimer et al. 2013). The IntCal13 calibration curve results in a calibrated age for the 13.39 ka age (ANU-7006) as 15,001  17,429 cal BP, overlapping at 1sd with the TL age of 15 ± 3 ka (KTL-165) at equivalent depth. Kamminga and Allens (1973) 18.04 ka age (SUA-265) calibrates to c. 22.4 - 21.0 ka, overlapping at 1sd with the TL age of 24 ± 5 ka (KTL-97) at equivalent depth. The 14.9 ka age (ANU-7007) provided by Roberts et al. (1998) calibrates to 18.5 - 17.8 ka, and remains within 1Ï of the TL age of KTL-97. These new calibrations show that conventional radiocarbon years do substantially under-estimate the ages of the sediments and that calendar ages show a strong correlation with luminescence ages. 
 
+### `plotting_slopes_chrono_data`
+
 ```{r difference-in-slope-plot}
 chrono_data_slopes_plot <- plotting_slopes_chrono_data(chrono_data_tidied)
 # show plot
 chrono_data_slopes_plot$the_plot
 ```
+
+
+Chech the structure of the `chrono_data_slopes_plot` output.
+
+```{r}
+str(chrono_data_slopes_plot, 1)
+```
+
 
 Plotting the linear regression lines for OSL/TL ages against radiocarbon ages suggests that the slopes of the lines are not the same. We can explore this further by comparing the models directly.
 
